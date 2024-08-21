@@ -1,0 +1,214 @@
+{
+  "name": "SemanticModel",
+  "compatibilityLevel": 1600,
+  "model": {
+    "culture": "en-US",
+    "dataSources": [
+      {
+        "type": "structured",
+        "name": "AzureBlobs/https://pjstrgacct blob core windows net/",
+        "connectionDetails": {
+          "protocol": "azure-blobs",
+          "address": {
+            "account": "pjstrgacct",
+            "domain": "blob.core.windows.net"
+          },
+          "authentication": null,
+          "query": null
+        },
+        "credential": {
+          "AuthenticationKind": "Key",
+          "kind": "AzureBlobs",
+          "path": "https://pjstrgacct.blob.core.windows.net/"
+        }
+      }
+    ],
+    "tables": [
+      {
+        "name": "pjcatalog",
+        "columns": [
+          {
+            "name": "InvoiceNo",
+            "dataType": "string",
+            "sourceColumn": "InvoiceNo"
+          },
+          {
+            "name": "StockCode",
+            "dataType": "string",
+            "sourceColumn": "StockCode"
+          },
+          {
+            "name": "Description",
+            "dataType": "string",
+            "sourceColumn": "Description"
+          },
+          {
+            "name": "Quantity",
+            "dataType": "int64",
+            "sourceColumn": "Quantity"
+          },
+          {
+            "name": "InvoiceDate",
+            "dataType": "dateTime",
+            "sourceColumn": "InvoiceDate"
+          },
+          {
+            "name": "UnitPrice",
+            "dataType": "double",
+            "sourceColumn": "UnitPrice"
+          },
+          {
+            "name": "CustomerID",
+            "dataType": "int64",
+            "sourceColumn": "CustomerID"
+          },
+          {
+            "name": "Country",
+            "dataType": "string",
+            "sourceColumn": "Country"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Partition",
+            "dataView": "full",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = #\"AzureBlobs/https://pjstrgacct blob core windows net/\",",
+                "    pjcatalog1 = Source{[Name=\"pjcatalog\"]}[Data],",
+                "    #\"https://pjstrgacct blob core windows net/pjcatalog/_online-retail-dataset csv\" = pjcatalog1{[#\"Folder Path\"=\"https://pjstrgacct.blob.core.windows.net/pjcatalog/\",Name=\"online-retail-dataset.csv\"]}[Content],",
+                "    #\"Imported CSV\" = Csv.Document(#\"https://pjstrgacct blob core windows net/pjcatalog/_online-retail-dataset csv\",[Delimiter=\",\", Columns=8, Encoding=1252, QuoteStyle=QuoteStyle.None]),",
+                "    #\"Promoted Headers\" = Table.PromoteHeaders(#\"Imported CSV\", [PromoteAllScalars=true]),",
+                "    #\"Changed Type\" = Table.TransformColumnTypes(#\"Promoted Headers\",{{\"InvoiceNo\", type text}, {\"StockCode\", type text}, {\"Description\", type text}, {\"Quantity\", Int64.Type}, {\"InvoiceDate\", type datetime}, {\"UnitPrice\", type number}, {\"CustomerID\", Int64.Type}, {\"Country\", type text}})",
+                "in",
+                "    #\"Changed Type\""
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "daily_pjcatalog",
+        "columns": [
+          {
+            "name": "InvoiceNo",
+            "dataType": "string",
+            "sourceColumn": "InvoiceNo"
+          },
+          {
+            "name": "StockCode",
+            "dataType": "string",
+            "sourceColumn": "StockCode"
+          },
+          {
+            "name": "Description",
+            "dataType": "string",
+            "sourceColumn": "Description"
+          },
+          {
+            "name": "Quantity",
+            "dataType": "int64",
+            "sourceColumn": "Quantity"
+          },
+          {
+            "name": "InvoiceDate",
+            "dataType": "dateTime",
+            "sourceColumn": "InvoiceDate"
+          },
+          {
+            "name": "UnitPrice",
+            "dataType": "double",
+            "sourceColumn": "UnitPrice"
+          },
+          {
+            "name": "CustomerID",
+            "dataType": "int64",
+            "sourceColumn": "CustomerID"
+          },
+          {
+            "name": "Country",
+            "dataType": "string",
+            "sourceColumn": "Country"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Partition",
+            "dataView": "full",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = #\"AzureBlobs/https://pjstrgacct blob core windows net/\",",
+                "    pjcatalog1 = Source{[Name=\"pjcatalog\"]}[Data],",
+                "    #\"Changed Type\" = Table.TransformColumnTypes(pjcatalog1,{{\"Content\", type binary}}),",
+                "    #\"https://pjstrgacct blob core windows net/pjcatalog/_2010-12-01 csv\" = #\"Changed Type\"{[#\"Folder Path\"=\"https://pjstrgacct.blob.core.windows.net/pjcatalog/\",Name=\"2010-12-01.csv\"]}[Content],",
+                "    #\"Imported CSV\" = Csv.Document(#\"https://pjstrgacct blob core windows net/pjcatalog/_2010-12-01 csv\",[Delimiter=\",\", Columns=8, Encoding=1252, QuoteStyle=QuoteStyle.None]),",
+                "    #\"Promoted Headers\" = Table.PromoteHeaders(#\"Imported CSV\", [PromoteAllScalars=true]),",
+                "    #\"Changed Type1\" = Table.TransformColumnTypes(#\"Promoted Headers\",{{\"InvoiceNo\", type text}, {\"StockCode\", type text}, {\"Description\", type text}, {\"Quantity\", Int64.Type}, {\"InvoiceDate\", type datetime}, {\"UnitPrice\", type number}, {\"CustomerID\", Int64.Type}, {\"Country\", type text}})",
+                "in",
+                "    #\"Changed Type1\""
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "69544eaf-9e36-4bea-bf9c-c3c19acd1d9f",
+        "toCardinality": "many",
+        "fromTable": "daily_pjcatalog",
+        "fromColumn": "InvoiceNo",
+        "toTable": "pjcatalog",
+        "toColumn": "InvoiceNo",
+        "crossFilteringBehavior": "bothDirections"
+      }
+    ],
+    "perspectives": [
+      {
+        "name": "MyTable",
+        "tables": [
+          {
+            "name": "pjcatalog",
+            "columns": [
+              {
+                "name": "Country"
+              },
+              {
+                "name": "CustomerID"
+              },
+              {
+                "name": "Description"
+              },
+              {
+                "name": "InvoiceDate"
+              },
+              {
+                "name": "InvoiceNo"
+              },
+              {
+                "name": "Quantity"
+              },
+              {
+                "name": "StockCode"
+              },
+              {
+                "name": "UnitPrice"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "annotations": [
+      {
+        "name": "ClientCompatibilityLevel",
+        "value": "700"
+      }
+    ]
+  },
+  "id": "SemanticModel"
+}
