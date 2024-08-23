@@ -8,8 +8,14 @@ trigger:
 
 pool:
   vmImage: ubuntu-latest
-
-steps:
+- task: deploy-aas-db@1
+  inputs:
+    connectedServiceNameSelector: 'ConnectedServiceNameARM'
+    connectedServiceNameARM: 'pjpayasugo(f7a522a7-655e-4268-addf-d4e8d2d5fd55)'
+    aasServer: 'asazure://westindia.asazure.windows.net/pjanalysisservices:rw'
+    adminName: 'User P J'
+    adminPassword: 'Term.0.12'
+    pathToModel: 'FirstTabularProject/Model.bim'
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
 
